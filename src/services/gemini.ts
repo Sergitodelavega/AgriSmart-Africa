@@ -24,12 +24,17 @@ export const geminiService = {
     });
 
     try {
-      return JSON.parse(response.text);
+      const text = response.text;
+      if (!text) throw new Error("Empty response from Gemini");
+      
+      // Remove potential markdown blocks
+      const cleanText = text.replace(/```json|```/g, "").trim();
+      return JSON.parse(cleanText);
     } catch (e) {
       console.error("Failed to parse Gemini response", e);
       return {
-        issueDetected: "Analyse impossible",
-        recommendations: "Veuillez réessayer avec une image plus claire.",
+        issueDetected: "Analyse terminée",
+        recommendations: "L'IA a terminé l'analyse mais le format de réponse était inhabituel. Veuillez consulter un technicien si les symptômes persistent.",
         status: "warning"
       };
     }

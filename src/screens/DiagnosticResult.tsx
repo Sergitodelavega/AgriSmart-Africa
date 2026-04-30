@@ -8,8 +8,15 @@ export default function DiagnosticResult() {
   const location = useLocation();
   const navigate = useNavigate();
   const data = location.state as Diagnostic;
+  
+  console.log("DiagnosticResult received data:", data);
 
-  if (!data) return <div className="p-10 text-center">Aucun résultat trouvé.</div>;
+  if (!data) return (
+    <div className="p-10 text-center flex flex-col items-center gap-4">
+      <p className="text-gray-500">Aucun résultat trouvé.</p>
+      <Link to="/diagnostic" className="text-emerald-600 font-bold">Retour au diagnostic</Link>
+    </div>
+  );
 
   const StatusHeader = () => {
     switch (data.status) {
@@ -65,7 +72,7 @@ export default function DiagnosticResult() {
               <ClipboardList className="w-4 h-4" /> Solutions recommandées
             </h4>
             <div className="mt-2 text-gray-700 text-sm space-y-2 leading-relaxed">
-              {data.recommendations.split('\n').map((line, i) => (
+              {(data.recommendations || "Aucune recommandation disponible.").split('\n').map((line, i) => (
                 <p key={i}>{line}</p>
               ))}
             </div>

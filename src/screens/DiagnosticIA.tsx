@@ -30,20 +30,33 @@ export default function DiagnosticIA() {
     setLoading(true);
     try {
       const base64 = image.split(',')[1];
+      console.log("Starting diagnosis for:", cropType);
       const result = await geminiService.diagnoseCrop(base64, cropType, profile?.language || 'fr');
+      console.log("Gemini result:", result);
 
       const diagnosticData = {
         userId: profile?.uid,
         imageUrl: image,
         cropType,
-        issueDetected: result.issueDetected,
-        recommendations: result.recommendations,
-        status: result.status,
+        issueDetected: result.issueDetected || "Inconnu",
+        recommendations: result.recommendations || "Aucune recommandation",
+        status: result.status || "warning",
         createdAt: new Date().toISOString()
       };
 
-      const docRef = await addDoc(collection(db, 'diagnostics'), diagnosticData);
-      navigate('/diagnostic/result', { state: { ...diagnosticData, id: docRef.id } });
+      console.log("Diagnostic data ready to save:", diagnosticData);
+      
+      let docId = "temp-" + Date.now();
+      try {
+        const docRef = await addDoc(collection(db, 'diagnostics'), diagnosticData);
+        docId = docRef.id;
+        console.log("Saved to Firestore with ID:", docId);
+      } catch (dbError) {
+        console.error("Firestore save error:", dbError);
+        // We continue anyway so the user sees the AI result even if DB sync fails
+      }
+
+      navigate('/diagnostic/result', { state: { ...diagnosticData, id: docId } });
     } catch (e) {
       console.error(e);
       alert("Erreur lors de l'analyse.");
@@ -82,8 +95,33 @@ export default function DiagnosticIA() {
           ref={fileInputRef} 
           onChange={handleImageChange} 
           className="hidden" 
-          accept="image/*" 
+          accept="image/*"
         />
+        <input 
+          type="file" 
+          id="cameraInput"
+          onChange={handleImageChange} 
+          className="hidden" 
+          accept="image/*" 
+          capture="environment"
+        />
+      </div>
+
+      <div className="flex gap-4">
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="flex-1 py-3 px-4 bg-white border border-gray-200 rounded-2xl text-sm font-semibold text-gray-700 flex items-center justify-center gap-2 active:bg-gray-50"
+        >
+          <Upload className="w-4 h-4 text-emerald-600" />
+          Galerie
+        </button>
+        <button
+          onClick={() => document.getElementById('cameraInput')?.click()}
+          className="flex-1 py-3 px-4 bg-white border border-gray-100 rounded-2xl text-sm font-semibold text-gray-700 flex items-center justify-center gap-2 active:bg-gray-50 shadow-sm"
+        >
+          <Camera className="w-4 h-4 text-emerald-600" />
+          Appareil Photo
+        </button>
       </div>
 
       <div className="space-y-4">
