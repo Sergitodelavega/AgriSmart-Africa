@@ -1,0 +1,6 @@
+{
+  "name": "AgriSmart Africa",
+  "description": "Une plateforme d'agribusiness alimentée par l'IA pour aider les petits agriculteurs en Afrique avec des diagnostics de cultures, des conseils personnalisés et une marketplace intégrée.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["firebase", "gemini-api"]
+}
